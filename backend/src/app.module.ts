@@ -21,12 +21,13 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 @Module({
   imports: [OrganizationsModule, MembersModule, PlansModule, MembershipsModule, TransactionsModule, AttendanceDevicesModule, AttendanceLogsModule, ProgressModule, ExercisesModule, WorkoutProgramsModule, WorkoutProgramExercisesModule, WorkoutLogsModule, WorkoutLogSetsModule, AiExerciseAnalysisModule, AiInsightsModule,TypeOrmModule.forRoot({
     type: 'postgres',
-      url: 'postgresql://neondb_owner:npg_RDXSMap62Cyr@ep-green-fire-adbswa69-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
+      url:'postgresql://neondb_owner:npg_RDXSMap62Cyr@ep-green-fire-adbswa69-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
       autoLoadEntities: true,
       entities: [__dirname + '/entities/*.entity.{ts,js}'],
       synchronize: true,
+      logging: true,
   })],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService], 
 })
 export class AppModule {}
