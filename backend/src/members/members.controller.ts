@@ -14,6 +14,7 @@ export class MembersController {
 
   @Get()
   findAll() {
+    
     return this.membersService.findAll();
   }
 
