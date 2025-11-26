@@ -1,22 +1,32 @@
-import { Sidebar } from "@/components/layout/Sidebar";
-import { Header } from "../components/layout/Header";
-import "./globals.css";
-import { ReduxProvider } from "@/lib/redux/Providers";
-import { Footer } from "@/components/layout/Footer";
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import { Providers } from './providers';
+import { Sidebar } from '@/components/layout/Sidebar';
 
-export const metadata = {
-  title: "Gym Dashboard",
-  description: "Gym Management System built with Next.js + NestJS",
+const inter = Inter({ subsets: ['latin'] });
+
+export const metadata: Metadata = {
+  title: 'GYM PRO - Management System',
+  description: 'AI-powered gym management system',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="ar" dir="rtl">
-      <body className="bg-gray-50 text-gray-900">
-        <Header />
-        <ReduxProvider>{children}</ReduxProvider>
-        <Footer />
-        
+    <html lang="en">
+      <body className={inter.className}>
+        <Providers>
+          <div className="flex min-h-screen bg-black">
+            <Sidebar />
+            <main className="flex-1 overflow-x-hidden">
+              {children}
+            </main>
+          </div>
+        </Providers>
       </body>
     </html>
   );
