@@ -21,7 +21,6 @@ import {
   Settings, 
   Building, 
   Sliders,
-  ChevronDown,
   ChevronRight,
   Zap
 } from 'lucide-react';
@@ -31,7 +30,7 @@ export const Sidebar = () => {
   const [expandedItems, setExpandedItems] = useState(['members', 'workouts']);
   const [activeLink, setActiveLink] = useState('/');
 
-  const toggleExpand = (label:any) => {
+  const toggleExpand = (label: any) => {
     setExpandedItems(prev => 
       prev.includes(label) 
         ? prev.filter(item => item !== label)
@@ -121,6 +120,7 @@ export const Sidebar = () => {
 
   return (
     <aside className="w-72 bg-gradient-to-b from-black via-gray-900 to-black h-screen sticky top-0 border-r-4 border-yellow-500 shadow-2xl overflow-y-auto">
+      
       {/* Logo Section */}
       <div className="p-6 border-b-2 border-yellow-500/30">
         <div className="flex items-center gap-3">
@@ -160,17 +160,17 @@ export const Sidebar = () => {
       <nav className="p-4 space-y-1">
         {menuItems.map((item) => {
           const Icon = item.icon;
-          const isExpanded = expandedItems.includes(item.label.toLowerCase().replace(/\s+/g, '-'));
+          const key = item.label.toLowerCase().replace(/\s+/g, '-');
+          const isExpanded = expandedItems.includes(key);
           const isActive = activeLink === item.link;
           const hasSubItems = item.subItems && item.subItems.length > 0;
 
           return (
             <div key={item.label}>
-              {/* Main Menu Item */}
               <button
                 onClick={() => {
                   if (hasSubItems) {
-                    toggleExpand(item.label.toLowerCase().replace(/\s+/g, '-'));
+                    toggleExpand(key);
                   } else {
                     setActiveLink(item.link);
                   }
@@ -192,6 +192,7 @@ export const Sidebar = () => {
                     </span>
                   )}
                 </div>
+
                 {hasSubItems && (
                   <div className={`transition-transform ${isExpanded ? 'rotate-90' : ''}`}>
                     <ChevronRight className={`w-4 h-4 ${isActive ? 'text-black' : 'text-gray-400'}`} />
@@ -199,7 +200,7 @@ export const Sidebar = () => {
                 )}
               </button>
 
-              {/* Sub Menu Items */}
+              {/* Sub Items */}
               {hasSubItems && isExpanded && (
                 <div className="ml-4 mt-1 space-y-1 border-l-2 border-yellow-500/20 pl-4">
                   {item.subItems.map((subItem) => {
@@ -228,7 +229,7 @@ export const Sidebar = () => {
         })}
       </nav>
 
-      {/* Bottom Section - Upgrade Card */}
+      {/* Upgrade Card */}
       <div className="p-4 mt-6">
         <div className="bg-gradient-to-br from-yellow-500 via-orange-500 to-red-500 rounded-xl p-5 shadow-2xl shadow-yellow-500/50">
           <div className="text-center">
