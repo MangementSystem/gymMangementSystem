@@ -1,21 +1,36 @@
-"use client";
-import { useState } from 'react';
-import { Building, Save, Mail, Phone, MapPin, Globe } from 'lucide-react';
-import { useGetOrganizationByIdQuery, useUpdateOrganizationMutation } from '@/lib/api/organizationsApi';
+'use client';
+import { useEffect, useState } from 'react';
+import { Building, Save, Phone, MapPin } from 'lucide-react';
+import {
+  useGetOrganizationByIdQuery,
+  useUpdateOrganizationMutation,
+} from '@/lib/api/organizationsApi';
 import { useAppSelector, useAppDispatch } from '@/lib/redux/hooks';
 import { selectCurrentOrganization, addNotification } from '@/lib/redux/slices/uiSlice';
 
 export default function OrganizationSettingsPage() {
   const dispatch = useAppDispatch();
   const currentOrganization = useAppSelector(selectCurrentOrganization);
-  const { data: organization, isLoading } = useGetOrganizationByIdQuery(currentOrganization || 1, { skip: !currentOrganization });
+  const { data: organization, isLoading } = useGetOrganizationByIdQuery(currentOrganization || 1, {
+    skip: !currentOrganization,
+  });
   const [updateOrganization, { isLoading: isSaving }] = useUpdateOrganizationMutation();
 
   const [formData, setFormData] = useState({
-    name: organization?.name || '',
-    address: organization?.address || '',
-    phone: organization?.phone || '',
+    name: '',
+    address: '',
+    phone: '',
   });
+
+  useEffect(() => {
+    if (organization) {
+      setFormData({
+        name: organization.name || '',
+        address: organization.address || '',
+        phone: organization.phone || '',
+      });
+    }
+  }, [organization]);
 
   const handleSave = async () => {
     if (!currentOrganization) return;
@@ -25,6 +40,14 @@ export default function OrganizationSettingsPage() {
     } catch {
       dispatch(addNotification({ type: 'error', message: 'Failed to update organization' }));
     }
+  };
+
+  const handleCancel = () => {
+    setFormData({
+      name: organization?.name || '',
+      address: organization?.address || '',
+      phone: organization?.phone || '',
+    });
   };
 
   return (
@@ -55,7 +78,9 @@ export default function OrganizationSettingsPage() {
           ) : (
             <div className="space-y-6">
               <div>
-                <label className="block text-sm font-black text-yellow-400 mb-2">Organization Name</label>
+                <label className="block text-sm font-black text-yellow-400 mb-2">
+                  Organization Name
+                </label>
                 <div className="relative">
                   <Building className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
                   <input
@@ -83,7 +108,9 @@ export default function OrganizationSettingsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-black text-yellow-400 mb-2">Phone Number</label>
+                <label className="block text-sm font-black text-yellow-400 mb-2">
+                  Phone Number
+                </label>
                 <div className="relative">
                   <Phone className="w-5 h-5 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
                   <input
@@ -97,7 +124,7 @@ export default function OrganizationSettingsPage() {
               </div>
 
               <div className="flex gap-4 pt-6 border-t border-yellow-500/20">
-                <button 
+                <button
                   onClick={handleSave}
                   disabled={isSaving}
                   className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-black px-8 py-3 rounded-lg hover:scale-105 transform transition-all flex items-center gap-2 shadow-lg disabled:opacity-50"
@@ -105,7 +132,10 @@ export default function OrganizationSettingsPage() {
                   <Save className="w-5 h-5" />
                   {isSaving ? 'Saving...' : 'Save Changes'}
                 </button>
-                <button className="bg-gray-800 border border-yellow-500/20 text-gray-400 font-black px-8 py-3 rounded-lg hover:border-yellow-500/50 transition-all">
+                <button
+                  onClick={handleCancel}
+                  className="bg-gray-800 border border-yellow-500/20 text-gray-400 font-black px-8 py-3 rounded-lg hover:border-yellow-500/50 transition-all"
+                >
                   Cancel
                 </button>
               </div>

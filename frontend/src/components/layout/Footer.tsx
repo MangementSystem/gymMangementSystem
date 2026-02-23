@@ -1,21 +1,20 @@
-"use cliet"
-    import { 
-  Dumbbell, 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Facebook, 
-  Twitter, 
-  Instagram, 
+'use cliet';
+import {
+  Dumbbell,
+  Mail,
+  Phone,
+  MapPin,
+  Facebook,
+  Twitter,
+  Instagram,
   Linkedin,
   Heart,
-  Clock,
   Users,
   TrendingUp,
   Shield,
   Zap,
   Award,
-  ExternalLink
+  ExternalLink,
 } from 'lucide-react';
 
 export const Footer = () => {
@@ -25,28 +24,28 @@ export const Footer = () => {
     { label: 'Dashboard', link: '/' },
     { label: 'Members', link: '/members' },
     { label: 'Plans', link: '/plans' },
-    { label: 'Payments', link: '/transactions' }
+    { label: 'Payments', link: '/transactions' },
   ];
 
   const resources = [
     { label: 'Help Center', link: '/help' },
     { label: 'API Documentation', link: '/docs' },
     { label: 'System Status', link: '/status' },
-    { label: 'Release Notes', link: '/releases' }
+    { label: 'Release Notes', link: '/releases' },
   ];
 
   const legal = [
     { label: 'Privacy Policy', link: '/privacy' },
     { label: 'Terms of Service', link: '/terms' },
     { label: 'Cookie Policy', link: '/cookies' },
-    { label: 'GDPR Compliance', link: '/gdpr' }
+    { label: 'GDPR Compliance', link: '/gdpr' },
   ];
 
   const stats = [
     { icon: Users, value: '10K+', label: 'Active Members' },
     { icon: TrendingUp, value: '99.9%', label: 'Uptime' },
     { icon: Award, value: '500+', label: 'Gyms Using' },
-    { icon: Zap, value: '24/7', label: 'Support' }
+    { icon: Zap, value: '24/7', label: 'Support' },
   ];
 
   return (
@@ -92,9 +91,10 @@ export const Footer = () => {
               </div>
             </div>
             <p className="text-gray-400 text-sm font-medium leading-relaxed mb-6">
-              The ultimate gym management solution with AI-powered insights, real-time attendance tracking, and comprehensive member analytics.
+              The ultimate gym management solution with AI-powered insights, real-time attendance
+              tracking, and comprehensive member analytics.
             </p>
-            
+
             {/* Contact Info */}
             <div className="space-y-3">
               <div className="flex items-center gap-3 text-sm text-gray-400 hover:text-yellow-400 transition-colors group">
@@ -232,14 +232,13 @@ export const Footer = () => {
               <span>© {currentYear} GYM PRO. All rights reserved.</span>
               <span className="hidden md:inline">|</span>
               <span className="flex items-center gap-1">
-                Made with <Heart className="w-4 h-4 text-red-500 fill-red-500 animate-pulse" /> for Fitness
+                Made with <Heart className="w-4 h-4 text-red-500 fill-red-500 animate-pulse" /> for
+                Fitness
               </span>
             </div>
             <div className="flex items-center gap-2">
               <Shield className="w-4 h-4 text-green-400" />
-              <span className="text-sm text-gray-400 font-medium">
-                Secured & GDPR Compliant
-              </span>
+              <span className="text-sm text-gray-400 font-medium">Secured & GDPR Compliant</span>
             </div>
           </div>
         </div>

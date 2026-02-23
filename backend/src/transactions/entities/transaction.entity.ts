@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Organization } from '../../organizations/entities/organization.entity';
 import { Membership } from '../../memberships/entities/membership.entity';
 import { Member } from '../../members/entities/member.entity';
@@ -8,13 +15,16 @@ export class Transaction {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @ManyToOne(() => Organization, org => org.transactions)
+  @ManyToOne(() => Organization, (org) => org.transactions)
+  @JoinColumn({ name: 'organization_id' })
   organization: Organization;
 
   @ManyToOne(() => Membership)
+  @JoinColumn({ name: 'membership_id' })
   membership: Membership;
 
   @ManyToOne(() => Member)
+  @JoinColumn({ name: 'member_id' })
   member: Member;
 
   @Column()

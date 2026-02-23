@@ -15,8 +15,10 @@ describe('AppController', () => {
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+    it('should return API welcome message', () => {
+      expect(appController.getHello()).toBe(
+        'Gym Management System API - v1.0.0',
+      );
     });
   });
 });

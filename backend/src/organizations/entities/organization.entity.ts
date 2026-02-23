@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  OneToMany,
+} from 'typeorm';
 import { Member } from '../../members/entities/member.entity';
 import { Plan } from '../../plans/entities/plan.entity';
 import { Membership } from '../../memberships/entities/membership.entity';
@@ -26,21 +32,21 @@ export class Organization {
   @CreateDateColumn()
   created_at: Date;
 
-  @OneToMany(() => Member, member => member.organization)
+  @OneToMany(() => Member, (member) => member.organization)
   members: Member[];
 
-  @OneToMany(() => Plan, plan => plan.organization)
+  @OneToMany(() => Plan, (plan) => plan.organization)
   plans: Plan[];
 
-  @OneToMany(() => Membership, m => m.organization)
+  @OneToMany(() => Membership, (m) => m.organization)
   memberships: Membership[];
 
-  @OneToMany(() => Transaction, t => t.organization)
+  @OneToMany(() => Transaction, (t) => t.organization)
   transactions: Transaction[];
 
-  @OneToMany(() => AttendanceDevice, d => d.organization)
+  @OneToMany(() => AttendanceDevice, (d) => d.organization)
   devices: AttendanceDevice[];
 
-  @OneToMany(() => AttendanceLog, l => l.organization)
+  @OneToMany(() => AttendanceLog, (l) => l.organization)
   logs: AttendanceLog[];
 }

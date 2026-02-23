@@ -1,22 +1,26 @@
 // store/index.ts
-import { configureStore } from "@reduxjs/toolkit";
-import { setupListeners } from "@reduxjs/toolkit/query";
-import uiReducer from "./slices/uiSlice";
-import { membersApi } from "../api/membersApi";
-import { organizationsApi } from "../api/organizationsApi";
-import { plansApi } from "../api/plansApi";
-import { membershipsApi } from "../api/membershipsApi";
-import { attendanceApi } from "../api/attendanceApi";
-import { workoutProgramsApi } from "../api/workoutProgramsApi";
-import { workoutLogsApi } from "../api/workoutLogsApi";
-import { exercisesApi } from "../api/exercisesApi";
-import { progressApi } from "../api/progressApi";
-import { transactionsApi } from "../api/transactionsApi";
-import { aiApi } from "../api/aiApi";
+import { configureStore } from '@reduxjs/toolkit';
+import { setupListeners } from '@reduxjs/toolkit/query';
+import uiReducer from './slices/uiSlice';
+import authReducer from './slices/authSlice';
+import { authApi } from '../api/authApi';
+import { membersApi } from '../api/membersApi';
+import { organizationsApi } from '../api/organizationsApi';
+import { plansApi } from '../api/plansApi';
+import { membershipsApi } from '../api/membershipsApi';
+import { attendanceApi } from '../api/attendanceApi';
+import { workoutProgramsApi } from '../api/workoutProgramsApi';
+import { workoutLogsApi } from '../api/workoutLogsApi';
+import { exercisesApi } from '../api/exercisesApi';
+import { progressApi } from '../api/progressApi';
+import { transactionsApi } from '../api/transactionsApi';
+import { aiApi } from '../api/aiApi';
 
 export const store = configureStore({
   reducer: {
     ui: uiReducer,
+    auth: authReducer,
+    [authApi.reducerPath]: authApi.reducer,
     [membersApi.reducerPath]: membersApi.reducer,
     [organizationsApi.reducerPath]: organizationsApi.reducer,
     [plansApi.reducerPath]: plansApi.reducer,
@@ -31,6 +35,7 @@ export const store = configureStore({
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
+      authApi.middleware,
       membersApi.middleware,
       organizationsApi.middleware,
       plansApi.middleware,
@@ -41,7 +46,7 @@ export const store = configureStore({
       exercisesApi.middleware,
       progressApi.middleware,
       transactionsApi.middleware,
-      aiApi.middleware
+      aiApi.middleware,
     ),
 });
 

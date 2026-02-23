@@ -1,26 +1,54 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Organization } from './entities/organization.entity';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
 
 @Injectable()
 export class OrganizationsService {
-  create(createOrganizationDto: CreateOrganizationDto) {
-    return 'This action adds a new organization';
+  constructor(
+    @InjectRepository(Organization)
+    private organizationRepository: Repository<Organization>,
+  ) {}
+
+  async create(
+    createOrganizationDto: CreateOrganizationDto,
+  ): Promise<Organization> {
+    const organization = this.organizationRepository.create(
+      createOrganizationDto,
+    );
+    return this.organizationRepository.save(organization);
   }
 
-  findAll() {
-    return `This action returns all organizations`;
+  async findAll(): Promise<Organization[]> {
+    return this.organizationRepository.find({
+      relations: ['members', 'plans'],
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} organization`;
+  async findOne(id: number): Promise<Organization> {
+    const organization = await this.organizationRepository.findOne({
+      where: { id },
+      relations: ['members', 'plans', 'memberships', 'transactions'],
+    });
+    if (!organization) {
+      throw new NotFoundException(`Organization with ID ${id} not found`);
+    }
+    return organization;
   }
 
-  update(id: number, updateOrganizationDto: UpdateOrganizationDto) {
-    return `This action updates a #${id} organization`;
+  async update(
+    id: number,
+    updateOrganizationDto: UpdateOrganizationDto,
+  ): Promise<Organization> {
+    const organization = await this.findOne(id);
+    Object.assign(organization, updateOrganizationDto);
+    return this.organizationRepository.save(organization);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} organization`;
+  async remove(id: number): Promise<void> {
+    const organization = await this.findOne(id);
+    await this.organizationRepository.remove(organization);
   }
 }

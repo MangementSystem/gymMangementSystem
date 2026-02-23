@@ -1,6 +1,11 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { RolesGuard } from './auth/guards/roles.guard';
 import { OrganizationsModule } from './organizations/organizations.module';
 import { MembersModule } from './members/members.module';
 import { PlansModule } from './plans/plans.module';
@@ -19,15 +24,49 @@ import { AiInsightsModule } from './ai-insights/ai-insights.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 
 @Module({
-  imports: [OrganizationsModule, MembersModule, PlansModule, MembershipsModule, TransactionsModule, AttendanceDevicesModule, AttendanceLogsModule, ProgressModule, ExercisesModule, WorkoutProgramsModule, WorkoutProgramExercisesModule, WorkoutLogsModule, WorkoutLogSetsModule, AiExerciseAnalysisModule, AiInsightsModule,TypeOrmModule.forRoot({
-    type: 'postgres',
-      url:'postgresql://neondb_owner:npg_RDXSMap62Cyr@ep-green-fire-adbswa69-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require',
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      url:
+        process.env.DATABASE_URL ||
+        'postgresql://localhost:5432/gym_management',
       autoLoadEntities: true,
-      entities: [__dirname + '/entities/*.entity.{ts,js}'],
-      synchronize: true,
-      logging: true,
-  })],
+      entities: [__dirname + '/**/*.entity.{ts,js}'],
+      synchronize: false,
+      logging: false,
+    }),
+    AuthModule,
+    OrganizationsModule,
+    MembersModule,
+    PlansModule,
+    MembershipsModule,
+    TransactionsModule,
+    AttendanceDevicesModule,
+    AttendanceLogsModule,
+    ProgressModule,
+    ExercisesModule,
+    WorkoutProgramsModule,
+    WorkoutProgramExercisesModule,
+    WorkoutLogsModule,
+    WorkoutLogSetsModule,
+    AiExerciseAnalysisModule,
+    AiInsightsModule,
+  ],
   controllers: [AppController],
-  providers: [AppService], 
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
 })
 export class AppModule {}

@@ -1,5 +1,18 @@
-"use client";
-import { Search, Bell, Plus, UserCircle, Settings, LogOut, User, ChevronDown, Dumbbell, Activity, TrendingUp, Zap } from 'lucide-react';
+'use client';
+import {
+  Search,
+  Bell,
+  Plus,
+  UserCircle,
+  Settings,
+  LogOut,
+  User,
+  ChevronDown,
+  Dumbbell,
+  Activity,
+  TrendingUp,
+  Zap,
+} from 'lucide-react';
 import { useState } from 'react';
 
 export const Header = () => {
@@ -8,10 +21,28 @@ export const Header = () => {
 
   // Mock data - replace with actual data from your backend
   const notifications = [
-    { id: 1, type: 'membership', message: 'John Doe membership expires in 3 days', time: '2 hours ago', icon: '⚠️' },
-    { id: 2, type: 'payment', message: 'New payment received: $150', time: '5 hours ago', icon: '💰' },
+    {
+      id: 1,
+      type: 'membership',
+      message: 'John Doe membership expires in 3 days',
+      time: '2 hours ago',
+      icon: '⚠️',
+    },
+    {
+      id: 2,
+      type: 'payment',
+      message: 'New payment received: $150',
+      time: '5 hours ago',
+      icon: '💰',
+    },
     { id: 3, type: 'alert', message: '5 members checked in today', time: '1 day ago', icon: '✅' },
-    { id: 4, type: 'workout', message: 'New workout program created for Sarah', time: '1 day ago', icon: '💪' }
+    {
+      id: 4,
+      type: 'workout',
+      message: 'New workout program created for Sarah',
+      time: '1 day ago',
+      icon: '💪',
+    },
   ];
 
   const unreadCount = 4;
@@ -31,7 +62,7 @@ export const Header = () => {
             <p className="text-xs text-gray-400 font-medium">Management Dashboard</p>
           </div>
         </div>
-        
+
         <div className="hidden lg:flex items-center gap-3 ml-6">
           <div className="group relative px-4 py-2 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/30 rounded-lg hover:border-yellow-500 transition-all">
             <div className="flex items-center gap-2">
@@ -42,7 +73,7 @@ export const Header = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="group relative px-4 py-2 bg-gradient-to-r from-orange-500/20 to-red-500/20 border border-orange-500/30 rounded-lg hover:border-orange-500 transition-all">
             <div className="flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-orange-400" />

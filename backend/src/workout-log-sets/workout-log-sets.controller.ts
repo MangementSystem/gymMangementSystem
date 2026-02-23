@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { WorkoutLogSetsService } from './workout-log-sets.service';
 import { CreateWorkoutLogSetDto } from './dto/create-workout-log-set.dto';
 import { UpdateWorkoutLogSetDto } from './dto/update-workout-log-set.dto';
@@ -13,8 +22,10 @@ export class WorkoutLogSetsController {
   }
 
   @Get()
-  findAll() {
-    return this.workoutLogSetsService.findAll();
+  findAll(@Query('workoutLogId') workoutLogId?: string) {
+    return this.workoutLogSetsService.findAll(
+      workoutLogId ? +workoutLogId : undefined,
+    );
   }
 
   @Get(':id')
@@ -23,7 +34,10 @@ export class WorkoutLogSetsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateWorkoutLogSetDto: UpdateWorkoutLogSetDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateWorkoutLogSetDto: UpdateWorkoutLogSetDto,
+  ) {
     return this.workoutLogSetsService.update(+id, updateWorkoutLogSetDto);
   }
 

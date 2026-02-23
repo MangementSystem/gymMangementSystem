@@ -1,4 +1,11 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateWorkoutLogDto } from './create-workout-log.dto';
+import { IsOptional, IsDateString, IsString } from 'class-validator';
 
-export class UpdateWorkoutLogDto extends PartialType(CreateWorkoutLogDto) {}
+export class UpdateWorkoutLogDto {
+  @IsOptional()
+  @IsDateString()
+  date?: Date;
+
+  @IsOptional()
+  @IsString()
+  ai_summary?: string;
+}

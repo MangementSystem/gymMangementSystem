@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { AttendanceLogsService } from './attendance-logs.service';
 import { CreateAttendanceLogDto } from './dto/create-attendance-log.dto';
 import { UpdateAttendanceLogDto } from './dto/update-attendance-log.dto';
@@ -13,8 +22,18 @@ export class AttendanceLogsController {
   }
 
   @Get()
-  findAll() {
-    return this.attendanceLogsService.findAll();
+  findAll(
+    @Query('organizationId') organizationId?: string,
+    @Query('memberId') memberId?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.attendanceLogsService.findAll(
+      organizationId ? +organizationId : undefined,
+      memberId ? +memberId : undefined,
+      startDate,
+      endDate,
+    );
   }
 
   @Get(':id')
@@ -23,12 +42,25 @@ export class AttendanceLogsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateAttendanceLogDto: UpdateAttendanceLogDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateAttendanceLogDto: UpdateAttendanceLogDto,
+  ) {
     return this.attendanceLogsService.update(+id, updateAttendanceLogDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.attendanceLogsService.remove(+id);
+  }
+
+  @Post('check-in')
+  checkIn(@Body() body: { memberId: number; deviceId?: number }) {
+    return this.attendanceLogsService.checkIn(body.memberId, body.deviceId);
+  }
+
+  @Post(':id/check-out')
+  checkOut(@Param('id') id: string) {
+    return this.attendanceLogsService.checkOut(+id);
   }
 }

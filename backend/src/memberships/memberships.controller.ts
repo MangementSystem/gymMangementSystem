@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { MembershipsService } from './memberships.service';
 import { CreateMembershipDto } from './dto/create-membership.dto';
 import { UpdateMembershipDto } from './dto/update-membership.dto';
@@ -13,8 +22,16 @@ export class MembershipsController {
   }
 
   @Get()
-  findAll() {
-    return this.membershipsService.findAll();
+  findAll(
+    @Query('organizationId') organizationId?: string,
+    @Query('memberId') memberId?: string,
+    @Query('status') status?: string,
+  ) {
+    return this.membershipsService.findAll(
+      organizationId ? +organizationId : undefined,
+      memberId ? +memberId : undefined,
+      status,
+    );
   }
 
   @Get(':id')
@@ -23,12 +40,25 @@ export class MembershipsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMembershipDto: UpdateMembershipDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateMembershipDto: UpdateMembershipDto,
+  ) {
     return this.membershipsService.update(+id, updateMembershipDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.membershipsService.remove(+id);
+  }
+
+  @Post(':id/renew')
+  renew(@Param('id') id: string, @Body() body: { planId: number }) {
+    return this.membershipsService.renew(+id, body.planId);
+  }
+
+  @Post(':id/cancel')
+  cancel(@Param('id') id: string) {
+    return this.membershipsService.cancel(+id);
   }
 }

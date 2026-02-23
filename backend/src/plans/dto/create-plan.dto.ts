@@ -1,9 +1,6 @@
-import { IsString, IsNumber, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsNumber } from 'class-validator';
 
 export class CreatePlanDto {
-  @IsNumber()
-  organizationId: number;
-
   @IsString()
   name: string;
 
@@ -16,4 +13,8 @@ export class CreatePlanDto {
   @IsOptional()
   @IsString()
   description?: string;
+
+  @IsOptional()
+  @IsNumber()
+  organizationId?: number;
 }

@@ -4,8 +4,9 @@ export class CreateAiExerciseAnalysisDto {
   @IsNumber()
   memberId: number;
 
+  @IsOptional()
   @IsNumber()
-  workoutLogId: number;
+  workoutLogId?: number;
 
   @IsNumber()
   exerciseId: number;

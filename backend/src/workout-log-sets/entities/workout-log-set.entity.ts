@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { WorkoutLog } from '../../workout-logs/entities/workout-log.entity';
 import { Exercise } from '../../exercises/entities/exercise.entity';
 
@@ -7,10 +13,12 @@ export class WorkoutLogSet {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @ManyToOne(() => WorkoutLog, wl => wl.sets)
+  @ManyToOne(() => WorkoutLog, (wl) => wl.sets)
+  @JoinColumn({ name: 'workout_log_id' })
   workout_log: WorkoutLog;
 
-  @ManyToOne(() => Exercise, e => e.log_sets)
+  @ManyToOne(() => Exercise, (e) => e.log_sets)
+  @JoinColumn({ name: 'exercise_id' })
   exercise: Exercise;
 
   @Column({ type: 'int', nullable: true })

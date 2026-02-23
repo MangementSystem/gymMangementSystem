@@ -1,7 +1,25 @@
-"use client";
+'use client';
 import { useState } from 'react';
-import { CreditCard, Plus, Search, Clock, CheckCircle, XCircle, AlertCircle, DollarSign, Calendar } from 'lucide-react';
-import { useGetMembershipsQuery, useRenewMembershipMutation, useCancelMembershipMutation } from '@/lib/api/membershipsApi';
+import {
+  CreditCard,
+  Plus,
+  Search,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  DollarSign,
+  Calendar,
+  X,
+} from 'lucide-react';
+import {
+  useGetMembershipsQuery,
+  useCreateMembershipMutation,
+  useRenewMembershipMutation,
+  useCancelMembershipMutation,
+} from '@/lib/api/membershipsApi';
+import { useGetMembersQuery } from '@/lib/api/membersApi';
+import { useGetPlansQuery } from '@/lib/api/plansApi';
 import { useAppSelector, useAppDispatch } from '@/lib/redux/hooks';
 import { selectCurrentOrganization, addNotification } from '@/lib/redux/slices/uiSlice';
 
@@ -10,27 +28,116 @@ export default function MembershipsPage() {
   const currentOrganization = useAppSelector(selectCurrentOrganization);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
+  const [openAdd, setOpenAdd] = useState(false);
 
-  const { data: memberships, isLoading } = useGetMembershipsQuery({ 
-    organizationId: currentOrganization || undefined 
+  const { data: memberships, isLoading } = useGetMembershipsQuery({
+    organizationId: currentOrganization || undefined,
   });
+  const { data: members } = useGetMembersQuery({
+    organizationId: currentOrganization || undefined,
+  });
+  const { data: plans } = useGetPlansQuery({
+    organizationId: currentOrganization || undefined,
+  });
+  const [createMembership] = useCreateMembershipMutation();
   const [renewMembership] = useRenewMembershipMutation();
   const [cancelMembership] = useCancelMembershipMutation();
 
-  const filteredMemberships = memberships?.filter(membership => {
-    const matchesSearch = 
-      membership.member?.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      membership.member?.last_name.toLowerCase().includes(searchQuery.toLowerCase());
+  const today = new Date().toISOString().split('T')[0];
+  const [form, setForm] = useState({
+    memberId: '',
+    planId: '',
+    start_date: today,
+    end_date: '',
+    status: 'active',
+    total_amount: '',
+    paid_amount: '',
+    remaining_amount: '0',
+    organizationId: currentOrganization || 1,
+  });
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    const updated = { ...form, [name]: value };
+    // Auto-compute remaining
+    if (name === 'total_amount' || name === 'paid_amount') {
+      const total = parseFloat(name === 'total_amount' ? value : updated.total_amount) || 0;
+      const paid = parseFloat(name === 'paid_amount' ? value : updated.paid_amount) || 0;
+      updated.remaining_amount = Math.max(0, total - paid).toString();
+    }
+    // Auto-set end_date based on selected plan
+    if (name === 'planId' && plans) {
+      const plan = plans.find((p) => p.id === Number(value));
+      if (plan && updated.start_date) {
+        const end = new Date(updated.start_date);
+        end.setDate(end.getDate() + plan.duration_days);
+        updated.end_date = end.toISOString().split('T')[0];
+        updated.total_amount = String(plan.price);
+        updated.remaining_amount = String(
+          Math.max(0, plan.price - (parseFloat(updated.paid_amount) || 0)),
+        );
+      }
+    }
+    setForm(updated);
+  };
+
+  const handleCreate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      await createMembership({
+        memberId: Number(form.memberId),
+        planId: Number(form.planId),
+        organizationId: currentOrganization || 1,
+        start_date: form.start_date,
+        end_date: form.end_date,
+        status: form.status,
+        total_amount: parseFloat(form.total_amount) || 0,
+        paid_amount: parseFloat(form.paid_amount) || 0,
+        remaining_amount: parseFloat(form.remaining_amount) || 0,
+      }).unwrap();
+      dispatch(addNotification({ type: 'success', message: 'Membership created successfully' }));
+      setOpenAdd(false);
+      setForm({
+        memberId: '',
+        planId: '',
+        start_date: today,
+        end_date: '',
+        status: 'active',
+        total_amount: '',
+        paid_amount: '',
+        remaining_amount: '0',
+        organizationId: currentOrganization || 1,
+      });
+    } catch (err: any) {
+      dispatch(
+        addNotification({
+          type: 'error',
+          message: err?.data?.message || 'Failed to create membership',
+        }),
+      );
+    }
+  };
+
+  const filteredMemberships = memberships?.filter((membership) => {
+    const memberName =
+      `${membership.member?.first_name ?? ''} ${membership.member?.last_name ?? ''}`.toLowerCase();
+    const matchesSearch = memberName.includes(searchQuery.toLowerCase());
     const matchesStatus = filterStatus === 'all' || membership.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
 
   const getStatusColor = (status: string) => {
-    switch(status) {
-      case 'active': return 'bg-green-500/20 border-green-500/50 text-green-400';
-      case 'expired': return 'bg-red-500/20 border-red-500/50 text-red-400';
-      case 'pending': return 'bg-yellow-500/20 border-yellow-500/50 text-yellow-400';
-      default: return 'bg-gray-500/20 border-gray-500/50 text-gray-400';
+    switch (status) {
+      case 'active':
+        return 'bg-green-500/20 border-green-500/50 text-green-400';
+      case 'expired':
+        return 'bg-red-500/20 border-red-500/50 text-red-400';
+      case 'pending':
+        return 'bg-yellow-500/20 border-yellow-500/50 text-yellow-400';
+      case 'cancelled':
+        return 'bg-gray-500/20 border-gray-500/50 text-gray-400';
+      default:
+        return 'bg-gray-500/20 border-gray-500/50 text-gray-400';
     }
   };
 
@@ -64,7 +171,10 @@ export default function MembershipsPage() {
           </h1>
           <p className="text-gray-400 font-bold">Manage member subscriptions</p>
         </div>
-        <button className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-black px-6 py-3 rounded-lg hover:scale-105 transform transition-all flex items-center gap-2 shadow-lg shadow-yellow-500/50">
+        <button
+          onClick={() => setOpenAdd(true)}
+          className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-black px-6 py-3 rounded-lg hover:scale-105 transform transition-all flex items-center gap-2 shadow-lg shadow-yellow-500/50"
+        >
           <Plus className="w-5 h-5" />
           New Membership
         </button>
@@ -73,37 +183,43 @@ export default function MembershipsPage() {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
         {[
-          { 
-            label: 'Total Memberships', 
-            value: memberships?.length || 0, 
+          {
+            label: 'Total Memberships',
+            value: memberships?.length || 0,
             gradient: 'from-yellow-400 to-orange-500',
-            icon: CreditCard 
+            icon: CreditCard,
           },
-          { 
-            label: 'Active', 
-            value: memberships?.filter(m => m.status === 'active')?.length || 0, 
+          {
+            label: 'Active',
+            value: memberships?.filter((m) => m.status === 'active')?.length || 0,
             gradient: 'from-green-500 to-emerald-500',
-            icon: CheckCircle 
+            icon: CheckCircle,
           },
-          { 
-            label: 'Expiring Soon', 
-            value: memberships?.filter(m => {
-              const daysLeft = Math.floor((new Date(m.end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-              return daysLeft > 0 && daysLeft <= 7;
-            })?.length || 0, 
+          {
+            label: 'Expiring Soon',
+            value:
+              memberships?.filter((m) => {
+                const daysLeft = Math.floor(
+                  (new Date(m.end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+                );
+                return daysLeft > 0 && daysLeft <= 7;
+              })?.length || 0,
             gradient: 'from-yellow-500 to-orange-500',
-            icon: AlertCircle 
+            icon: AlertCircle,
           },
-          { 
-            label: 'Expired', 
-            value: memberships?.filter(m => m.status === 'expired')?.length || 0, 
+          {
+            label: 'Expired',
+            value: memberships?.filter((m) => m.status === 'expired')?.length || 0,
             gradient: 'from-red-500 to-orange-400',
-            icon: XCircle 
-          }
+            icon: XCircle,
+          },
         ].map((stat) => {
           const Icon = stat.icon;
           return (
-            <div key={stat.label} className={`bg-gradient-to-br ${stat.gradient} p-6 rounded-xl shadow-lg`}>
+            <div
+              key={stat.label}
+              className={`bg-gradient-to-br ${stat.gradient} p-6 rounded-xl shadow-lg`}
+            >
               <div className="flex items-center justify-between mb-2">
                 <p className="text-black/70 text-sm font-black">{stat.label}</p>
                 <Icon className="w-5 h-5 text-black/70" />
@@ -127,7 +243,7 @@ export default function MembershipsPage() {
               className="w-full bg-gray-800 border border-yellow-500/20 rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:border-yellow-500/50 focus:outline-none font-bold"
             />
           </div>
-          <select 
+          <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
             className="bg-gray-800 border border-yellow-500/20 rounded-lg px-4 py-3 text-white focus:border-yellow-500/50 focus:outline-none font-bold"
@@ -136,6 +252,7 @@ export default function MembershipsPage() {
             <option value="active">Active</option>
             <option value="expired">Expired</option>
             <option value="pending">Pending</option>
+            <option value="cancelled">Cancelled</option>
           </select>
         </div>
       </div>
@@ -152,18 +269,31 @@ export default function MembershipsPage() {
             <table className="w-full">
               <thead className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-b-2 border-yellow-500/20">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-black text-yellow-400 uppercase tracking-wider">Member</th>
-                  <th className="px-6 py-4 text-left text-xs font-black text-yellow-400 uppercase tracking-wider">Plan</th>
-                  <th className="px-6 py-4 text-left text-xs font-black text-yellow-400 uppercase tracking-wider">Duration</th>
-                  <th className="px-6 py-4 text-left text-xs font-black text-yellow-400 uppercase tracking-wider">Payment</th>
-                  <th className="px-6 py-4 text-left text-xs font-black text-yellow-400 uppercase tracking-wider">Status</th>
-                  <th className="px-6 py-4 text-left text-xs font-black text-yellow-400 uppercase tracking-wider">Actions</th>
+                  <th className="px-6 py-4 text-left text-xs font-black text-yellow-400 uppercase tracking-wider">
+                    Member
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-black text-yellow-400 uppercase tracking-wider">
+                    Plan
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-black text-yellow-400 uppercase tracking-wider">
+                    Duration
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-black text-yellow-400 uppercase tracking-wider">
+                    Payment
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-black text-yellow-400 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-black text-yellow-400 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-yellow-500/10">
                 {filteredMemberships?.map((membership) => {
-                  const daysLeft = Math.floor((new Date(membership.end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-                  
+                  const daysLeft = Math.floor(
+                    (new Date(membership.end_date).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+                  );
                   return (
                     <tr key={membership.id} className="hover:bg-yellow-500/5 transition-all">
                       <td className="px-6 py-4">
@@ -181,7 +311,9 @@ export default function MembershipsPage() {
                       </td>
                       <td className="px-6 py-4">
                         <p className="font-black text-white">{membership.plan?.name || 'N/A'}</p>
-                        <p className="text-sm text-gray-400 font-medium">${membership.total_amount}</p>
+                        <p className="text-sm text-gray-400 font-medium">
+                          ${membership.total_amount}
+                        </p>
                       </td>
                       <td className="px-6 py-4">
                         <div className="space-y-1">
@@ -194,7 +326,9 @@ export default function MembershipsPage() {
                             {new Date(membership.end_date).toLocaleDateString()}
                           </div>
                           {daysLeft > 0 && daysLeft <= 7 && (
-                            <p className="text-xs text-yellow-400 font-bold">Expires in {daysLeft} days</p>
+                            <p className="text-xs text-yellow-400 font-bold">
+                              Expires in {daysLeft} days
+                            </p>
                           )}
                         </div>
                       </td>
@@ -217,34 +351,189 @@ export default function MembershipsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className={`px-3 py-1 text-xs font-black rounded-full border ${getStatusColor(membership.status)}`}>
+                        <span
+                          className={`px-3 py-1 text-xs font-black rounded-full border ${getStatusColor(membership.status)}`}
+                        >
                           {membership.status}
                         </span>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
-                          <button 
+                          <button
                             onClick={() => handleRenew(membership.id, membership.plan?.id || 1)}
                             className="px-3 py-2 bg-green-500/20 border border-green-500/50 text-green-400 text-xs font-black rounded-lg hover:bg-green-500/30 transition-all"
                           >
                             Renew
                           </button>
-                          <button 
-                            onClick={() => handleCancel(membership.id)}
-                            className="px-3 py-2 bg-red-500/20 border border-red-500/50 text-red-400 text-xs font-black rounded-lg hover:bg-red-500/30 transition-all"
-                          >
-                            Cancel
-                          </button>
+                          {membership.status !== 'cancelled' && (
+                            <button
+                              onClick={() => handleCancel(membership.id)}
+                              className="px-3 py-2 bg-red-500/20 border border-red-500/50 text-red-400 text-xs font-black rounded-lg hover:bg-red-500/30 transition-all"
+                            >
+                              Cancel
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
                   );
                 })}
+                {(!filteredMemberships || filteredMemberships.length === 0) && (
+                  <tr>
+                    <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+                      <CreditCard className="w-16 h-16 mx-auto mb-4 opacity-30" />
+                      <p className="font-bold">No memberships found.</p>
+                      <p className="text-sm mt-1">
+                        Click &quot;New Membership&quot; to create one.
+                      </p>
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
         )}
       </div>
+
+      {/* Add Membership Modal */}
+      {openAdd && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-gradient-to-br from-gray-900 to-black border border-yellow-500/30 rounded-2xl p-8 max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-black text-white">New Membership</h2>
+              <button onClick={() => setOpenAdd(false)} className="text-gray-400 hover:text-white">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            <form onSubmit={handleCreate} className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-gray-400 mb-1">Member *</label>
+                <select
+                  name="memberId"
+                  value={form.memberId}
+                  onChange={handleChange}
+                  className="w-full bg-black/50 border border-yellow-500/20 rounded-lg px-4 py-3 text-white outline-none focus:border-yellow-500"
+                  required
+                >
+                  <option value="">Select member...</option>
+                  {members?.map((m: any) => (
+                    <option key={m.id} value={m.id}>
+                      {m.first_name} {m.last_name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-gray-400 mb-1">Plan *</label>
+                <select
+                  name="planId"
+                  value={form.planId}
+                  onChange={handleChange}
+                  className="w-full bg-black/50 border border-yellow-500/20 rounded-lg px-4 py-3 text-white outline-none focus:border-yellow-500"
+                  required
+                >
+                  <option value="">Select plan...</option>
+                  {plans?.map((p: any) => (
+                    <option key={p.id} value={p.id}>
+                      {p.name} – ${p.price} / {p.duration_days} days
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-400 mb-1">Start Date *</label>
+                  <input
+                    type="date"
+                    name="start_date"
+                    value={form.start_date}
+                    onChange={handleChange}
+                    className="w-full bg-black/50 border border-yellow-500/20 rounded-lg px-4 py-3 text-white outline-none focus:border-yellow-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-400 mb-1">End Date *</label>
+                  <input
+                    type="date"
+                    name="end_date"
+                    value={form.end_date}
+                    onChange={handleChange}
+                    className="w-full bg-black/50 border border-yellow-500/20 rounded-lg px-4 py-3 text-white outline-none focus:border-yellow-500"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-bold text-gray-400 mb-1">
+                    Total Amount *
+                  </label>
+                  <input
+                    type="number"
+                    name="total_amount"
+                    value={form.total_amount}
+                    onChange={handleChange}
+                    placeholder="0.00"
+                    className="w-full bg-black/50 border border-yellow-500/20 rounded-lg px-4 py-3 text-white outline-none focus:border-yellow-500"
+                    required
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-400 mb-1">
+                    Paid Amount *
+                  </label>
+                  <input
+                    type="number"
+                    name="paid_amount"
+                    value={form.paid_amount}
+                    onChange={handleChange}
+                    placeholder="0.00"
+                    className="w-full bg-black/50 border border-yellow-500/20 rounded-lg px-4 py-3 text-white outline-none focus:border-yellow-500"
+                    required
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+              </div>
+              {form.remaining_amount && Number(form.remaining_amount) > 0 && (
+                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm font-bold">
+                  Remaining due: ${form.remaining_amount}
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-bold text-gray-400 mb-1">Status</label>
+                <select
+                  name="status"
+                  value={form.status}
+                  onChange={handleChange}
+                  className="w-full bg-black/50 border border-yellow-500/20 rounded-lg px-4 py-3 text-white outline-none focus:border-yellow-500"
+                >
+                  <option value="active">Active</option>
+                  <option value="pending">Pending</option>
+                </select>
+              </div>
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => setOpenAdd(false)}
+                  className="flex-1 bg-gray-800 hover:bg-gray-700 text-white font-bold py-3 rounded-lg transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-black py-3 rounded-lg hover:scale-105 transform transition-all"
+                >
+                  Create Membership
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

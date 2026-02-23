@@ -1,6 +1,15 @@
-"use client";
+'use client';
 import { useState } from 'react';
-import { Sparkles, Target, TrendingUp, AlertTriangle, Calendar, User, Zap, Brain } from 'lucide-react';
+import {
+  Sparkles,
+  Target,
+  TrendingUp,
+  AlertTriangle,
+  Calendar,
+  User,
+  Zap,
+  Brain,
+} from 'lucide-react';
 import { useGetAiInsightsQuery, useGenerateInsightMutation } from '@/lib/api/aiApi';
 import { useGetMembersQuery } from '@/lib/api/membersApi';
 import { useAppSelector, useAppDispatch } from '@/lib/redux/hooks';
@@ -12,17 +21,19 @@ export default function MemberInsightsPage() {
   const [selectedMemberId, setSelectedMemberId] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  const { data: members } = useGetMembersQuery({ organizationId: currentOrganization || undefined });
+  const { data: members } = useGetMembersQuery({
+    organizationId: currentOrganization || undefined,
+  });
   const { data: insights, isLoading } = useGetAiInsightsQuery(
     { memberId: selectedMemberId || undefined },
-    { skip: !selectedMemberId }
+    { skip: !selectedMemberId },
   );
   const [generateInsight, { isLoading: isGenerating }] = useGenerateInsightMutation();
 
   const categories = ['all', 'performance', 'nutrition', 'recovery', 'goals'];
 
-  const filteredInsights = insights?.filter(insight => 
-    selectedCategory === 'all' || insight.category === selectedCategory
+  const filteredInsights = insights?.filter(
+    (insight) => selectedCategory === 'all' || insight.category === selectedCategory,
   );
 
   const handleGenerateInsight = async () => {
@@ -34,7 +45,7 @@ export default function MemberInsightsPage() {
       await generateInsight({
         memberId: selectedMemberId,
         category: 'performance',
-        inputData: {}
+        inputData: {},
       }).unwrap();
       dispatch(addNotification({ type: 'success', message: 'Insight generated successfully' }));
     } catch {
@@ -67,7 +78,7 @@ export default function MemberInsightsPage() {
             <User className="w-6 h-6 text-yellow-400" />
             <h2 className="text-xl font-black text-white">Select Member</h2>
           </div>
-          <select 
+          <select
             value={selectedMemberId || ''}
             onChange={(e) => setSelectedMemberId(Number(e.target.value))}
             className="w-full bg-gray-800 border border-yellow-500/20 rounded-lg px-4 py-3 text-white focus:border-yellow-500/50 focus:outline-none font-bold mb-4"
@@ -80,7 +91,7 @@ export default function MemberInsightsPage() {
             ))}
           </select>
 
-          <button 
+          <button
             onClick={handleGenerateInsight}
             disabled={!selectedMemberId || isGenerating}
             className="w-full bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-black px-6 py-3 rounded-lg hover:scale-105 transform transition-all flex items-center justify-center gap-2 shadow-lg disabled:opacity-50"
@@ -105,7 +116,9 @@ export default function MemberInsightsPage() {
             <Target className="w-5 h-5 text-black/70" />
           </div>
           <p className="text-black/70 text-sm font-black mb-1">ACTIVE ALERTS</p>
-          <p className="text-5xl font-black text-black">{insights?.filter(i => i.risk_alert)?.length || 0}</p>
+          <p className="text-5xl font-black text-black">
+            {insights?.filter((i) => i.risk_alert)?.length || 0}
+          </p>
         </div>
       </div>
 
@@ -140,7 +153,7 @@ export default function MemberInsightsPage() {
               </div>
             ) : filteredInsights && filteredInsights.length > 0 ? (
               filteredInsights.map((insight) => (
-                <div 
+                <div
                   key={insight.id}
                   className="bg-gradient-to-br from-gray-900/50 to-black border-2 border-yellow-500/20 rounded-xl p-6 hover:border-yellow-500/50 transition-all"
                 >
@@ -150,14 +163,16 @@ export default function MemberInsightsPage() {
                         <Sparkles className="w-6 h-6 text-black" />
                       </div>
                       <div>
-                        <h3 className="text-xl font-black text-white capitalize">{insight.category}</h3>
+                        <h3 className="text-xl font-black text-white capitalize">
+                          {insight.category}
+                        </h3>
                         <div className="flex items-center gap-2 text-sm text-gray-400 font-medium">
                           <Calendar className="w-4 h-4" />
                           {new Date(insight.created_at).toLocaleDateString()}
                         </div>
                       </div>
                     </div>
-                    
+
                     {insight.risk_alert && (
                       <span className="px-3 py-1 bg-red-500/20 border border-red-500/50 text-red-400 text-xs font-black rounded-full flex items-center gap-1">
                         <AlertTriangle className="w-3 h-3" />
@@ -220,7 +235,9 @@ export default function MemberInsightsPage() {
               <div className="bg-gradient-to-br from-gray-900/50 to-black border-2 border-yellow-500/20 rounded-xl p-12 text-center">
                 <Sparkles className="w-16 h-16 text-gray-600 mx-auto mb-4" />
                 <p className="text-gray-400 font-bold text-lg">No insights available yet</p>
-                <p className="text-gray-500 font-medium mt-2">Generate insights to see AI-powered recommendations</p>
+                <p className="text-gray-500 font-medium mt-2">
+                  Generate insights to see AI-powered recommendations
+                </p>
               </div>
             )}
           </div>
@@ -258,7 +275,9 @@ export default function MemberInsightsPage() {
       ) : (
         <div className="bg-gradient-to-br from-gray-900/50 to-black border-2 border-yellow-500/20 rounded-xl p-12 text-center">
           <User className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-          <p className="text-gray-400 font-bold text-lg">Select a member to view their AI insights</p>
+          <p className="text-gray-400 font-bold text-lg">
+            Select a member to view their AI insights
+          </p>
         </div>
       )}
     </div>

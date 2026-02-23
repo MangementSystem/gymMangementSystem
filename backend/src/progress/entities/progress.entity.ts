@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Member } from '../../members/entities/member.entity';
 
 @Entity('progress')
@@ -6,7 +13,8 @@ export class Progress {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @ManyToOne(() => Member, member => member.progress)
+  @ManyToOne(() => Member, (member) => member.progress)
+  @JoinColumn({ name: 'member_id' })
   member: Member;
 
   @Column({ type: 'date' })

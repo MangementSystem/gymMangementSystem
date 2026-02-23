@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { WorkoutLogSet } from '../../workout-log-sets/entities/workout-log-set.entity';
 import { WorkoutProgramExercise } from '../../workout-program-exercises/entities/workout-program-exercise.entity';
 import { AiExerciseAnalysis } from '../../ai-exercise-analysis/entities/ai-exercise-analysis.entity';
@@ -32,12 +39,15 @@ export class Exercise {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @OneToMany(() => WorkoutLogSet, set => set.exercise)
+  @OneToMany(() => WorkoutLogSet, (set) => set.exercise)
   log_sets: WorkoutLogSet[];
 
-  @OneToMany(() => WorkoutProgramExercise, programExercise => programExercise.exercise)
+  @OneToMany(
+    () => WorkoutProgramExercise,
+    (programExercise) => programExercise.exercise,
+  )
   program_exercises: WorkoutProgramExercise[];
 
-  @OneToMany(() => AiExerciseAnalysis, analysis => analysis.exercise)
+  @OneToMany(() => AiExerciseAnalysis, (analysis) => analysis.exercise)
   ai_analysis: AiExerciseAnalysis[];
 }

@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, OneToMany, OneToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+} from 'typeorm';
 import { Organization } from '../../organizations/entities/organization.entity';
 import { Membership } from '../../memberships/entities/membership.entity';
 import { AttendanceLog } from '../../attendance-logs/entities/attendance-log.entity';
@@ -13,7 +21,8 @@ export class Member {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @ManyToOne(() => Organization, org => org.members)
+  @ManyToOne(() => Organization, (org) => org.members)
+  @JoinColumn({ name: 'organization_id' })
   organization: Organization;
 
   @Column()
@@ -52,24 +61,24 @@ export class Member {
   @CreateDateColumn()
   created_at: Date;
 
-  @OneToMany(() => Membership, m => m.member)
+  @OneToMany(() => Membership, (m) => m.member)
   memberships: Membership[];
 
-  @OneToMany(() => AttendanceLog, log => log.member)
+  @OneToMany(() => AttendanceLog, (log) => log.member)
   attendance_logs: AttendanceLog[];
 
-  @OneToMany(() => Progress, p => p.member)
+  @OneToMany(() => Progress, (p) => p.member)
   progress: Progress[];
 
-  @OneToMany(() => WorkoutProgram, wp => wp.member)
+  @OneToMany(() => WorkoutProgram, (wp) => wp.member)
   workout_programs: WorkoutProgram[];
 
-  @OneToMany(() => WorkoutLog, wl => wl.member)
+  @OneToMany(() => WorkoutLog, (wl) => wl.member)
   workout_logs: WorkoutLog[];
 
-  @OneToMany(() => AiExerciseAnalysis, a => a.member)
+  @OneToMany(() => AiExerciseAnalysis, (a) => a.member)
   ai_analysis: AiExerciseAnalysis[];
 
-  @OneToMany(() => AiInsight, a => a.member)
+  @OneToMany(() => AiInsight, (a) => a.member)
   ai_insights: AiInsight[];
 }

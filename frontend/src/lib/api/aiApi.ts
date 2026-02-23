@@ -1,95 +1,114 @@
-// store/api/aiApi.ts
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import type { AiExerciseAnalysis } from "../../../../backend/src/ai-exercise-analysis/entities/ai-exercise-analysis.entity";
-import type { AiInsight } from "../../../../backend/src/ai-insights/entities/ai-insight.entity";
+import { createApi } from '@reduxjs/toolkit/query/react';
+import { createApiBaseQuery } from './baseQuery';
+import type { AiExerciseAnalysis, AiInsight } from './types';
 
-const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000/api";
+export interface CreateAiExerciseAnalysisRequest {
+  memberId: number;
+  workoutLogId?: number;
+  exerciseId: number;
+  posture_score?: number;
+  stability_score?: number;
+  movement_efficiency?: number;
+  risk_level?: string;
+  detected_errors?: Record<string, any>;
+  recommended_fix?: string;
+}
+
+export interface AnalyzeExerciseFormRequest {
+  videoUrl?: string;
+  exerciseId: number;
+  memberId: number;
+  workoutLogId?: number;
+}
+
+export interface GenerateInsightRequest {
+  memberId: number;
+  category: string;
+  inputData?: Record<string, any>;
+}
 
 export const aiApi = createApi({
-  reducerPath: "aiApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: `${baseUrl}/ai`,
-    credentials: "include",
-  }),
-  tagTypes: ["ExerciseAnalysis", "AiInsight"],
+  reducerPath: 'aiApi',
+  baseQuery: createApiBaseQuery(),
+  tagTypes: ['ExerciseAnalysis', 'AiInsight'],
   endpoints: (builder) => ({
-    getExerciseAnalyses: builder.query<AiExerciseAnalysis[], { memberId?: number; workoutLogId?: number }>({
-      query: (params) => ({
-        url: "/exercise-analysis",
-        params,
-      }),
+    getExerciseAnalyses: builder.query<
+      AiExerciseAnalysis[],
+      { memberId?: number; workoutLogId?: number }
+    >({
+      query: (params) => ({ url: '/ai-exercise-analysis', params }),
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ id }) => ({ type: "ExerciseAnalysis" as const, id })),
-              { type: "ExerciseAnalysis", id: "LIST" },
+              ...result.map(({ id }) => ({ type: 'ExerciseAnalysis' as const, id })),
+              { type: 'ExerciseAnalysis', id: 'LIST' },
             ]
-          : [{ type: "ExerciseAnalysis", id: "LIST" }],
+          : [{ type: 'ExerciseAnalysis', id: 'LIST' }],
     }),
-    
+
     getExerciseAnalysisById: builder.query<AiExerciseAnalysis, number>({
-      query: (id) => `/exercise-analysis/${id}`,
-      providesTags: (result, error, id) => [{ type: "ExerciseAnalysis", id }],
+      query: (id) => `/ai-exercise-analysis/${id}`,
+      providesTags: (_result, _error, id) => [{ type: 'ExerciseAnalysis', id }],
     }),
-    
-    createExerciseAnalysis: builder.mutation<AiExerciseAnalysis, Partial<AiExerciseAnalysis>>({
+
+    createExerciseAnalysis: builder.mutation<AiExerciseAnalysis, CreateAiExerciseAnalysisRequest>({
       query: (body) => ({
-        url: "/exercise-analysis",
-        method: "POST",
+        url: '/ai-exercise-analysis',
+        method: 'POST',
         body,
       }),
-      invalidatesTags: [{ type: "ExerciseAnalysis", id: "LIST" }],
+      invalidatesTags: [{ type: 'ExerciseAnalysis', id: 'LIST' }],
     }),
-    
-    analyzeExerciseForm: builder.mutation<AiExerciseAnalysis, { videoUrl: string; exerciseId: number; memberId: number }>({
+
+    analyzeExerciseForm: builder.mutation<AiExerciseAnalysis, AnalyzeExerciseFormRequest>({
       query: (body) => ({
-        url: "/exercise-analysis/analyze",
-        method: "POST",
+        url: '/ai-exercise-analysis/analyze',
+        method: 'POST',
         body,
       }),
-      invalidatesTags: [{ type: "ExerciseAnalysis", id: "LIST" }],
+      invalidatesTags: [{ type: 'ExerciseAnalysis', id: 'LIST' }],
     }),
-    
+
     getAiInsights: builder.query<AiInsight[], { memberId?: number; category?: string }>({
       query: (params) => ({
-        url: "/insights",
+        url: '/ai-insights',
         params,
       }),
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ id }) => ({ type: "AiInsight" as const, id })),
-              { type: "AiInsight", id: "LIST" },
+              ...result.map(({ id }) => ({ type: 'AiInsight' as const, id })),
+              { type: 'AiInsight', id: 'LIST' },
             ]
-          : [{ type: "AiInsight", id: "LIST" }],
+          : [{ type: 'AiInsight', id: 'LIST' }],
     }),
-    
+
     getAiInsightById: builder.query<AiInsight, number>({
-      query: (id) => `/insights/${id}`,
-      providesTags: (result, error, id) => [{ type: "AiInsight", id }],
+      query: (id) => `/ai-insights/${id}`,
+      providesTags: (_result, _error, id) => [{ type: 'AiInsight', id }],
     }),
-    
-    generateInsight: builder.mutation<AiInsight, { memberId: number; category: string; inputData: any }>({
+
+    generateInsight: builder.mutation<AiInsight, GenerateInsightRequest>({
       query: (body) => ({
-        url: "/insights/generate",
-        method: "POST",
+        url: '/ai-insights/generate',
+        method: 'POST',
         body,
       }),
-      invalidatesTags: [{ type: "AiInsight", id: "LIST" }],
+      invalidatesTags: [{ type: 'AiInsight', id: 'LIST' }],
     }),
-    
+
     generateWorkoutRecommendation: builder.mutation<any, { memberId: number; goals: string[] }>({
       query: (body) => ({
-        url: "/recommendations/workout",
-        method: "POST",
+        url: '/ai-insights/recommendations/workout',
+        method: 'POST',
         body,
       }),
     }),
-    
+
     predictGoalCompletion: builder.mutation<any, { memberId: number; goalType: string }>({
       query: (body) => ({
-        url: "/predictions/goal-completion",
-        method: "POST",
+        url: '/ai-insights/predictions/goal-completion',
+        method: 'POST',
         body,
       }),
     }),

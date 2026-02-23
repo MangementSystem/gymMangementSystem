@@ -1,4 +1,10 @@
-import { IsString, IsNumber, IsOptional, IsDateString, IsObject } from 'class-validator';
+import {
+  IsString,
+  IsNumber,
+  IsOptional,
+  IsDateString,
+  IsObject,
+} from 'class-validator';
 
 export class CreateAiInsightDto {
   @IsNumber()

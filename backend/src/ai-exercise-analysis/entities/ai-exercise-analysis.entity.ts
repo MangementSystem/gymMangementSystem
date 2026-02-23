@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  CreateDateColumn,
+  JoinColumn,
+} from 'typeorm';
 import { Member } from '../../members/entities/member.entity';
 import { WorkoutLog } from '../../workout-logs/entities/workout-log.entity';
 import { Exercise } from '../../exercises/entities/exercise.entity';
@@ -8,13 +15,16 @@ export class AiExerciseAnalysis {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @ManyToOne(() => Member, m => m.ai_analysis)
+  @ManyToOne(() => Member, (m) => m.ai_analysis)
+  @JoinColumn({ name: 'member_id' })
   member: Member;
 
-  @ManyToOne(() => WorkoutLog, wl => wl.ai_analysis)
+  @ManyToOne(() => WorkoutLog, (wl) => wl.ai_analysis)
+  @JoinColumn({ name: 'workout_log_id' })
   workout_log: WorkoutLog;
 
-  @ManyToOne(() => Exercise, e => e.ai_analysis)
+  @ManyToOne(() => Exercise, (e) => e.ai_analysis)
+  @JoinColumn({ name: 'exercise_id' })
   exercise: Exercise;
 
   @Column({ type: 'numeric', nullable: true })

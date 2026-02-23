@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { PlansService } from './plans.service';
 import { CreatePlanDto } from './dto/create-plan.dto';
 import { UpdatePlanDto } from './dto/update-plan.dto';
@@ -13,8 +22,10 @@ export class PlansController {
   }
 
   @Get()
-  findAll() {
-    return this.plansService.findAll();
+  findAll(@Query('organizationId') organizationId?: string) {
+    return this.plansService.findAll(
+      organizationId ? +organizationId : undefined,
+    );
   }
 
   @Get(':id')

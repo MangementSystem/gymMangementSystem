@@ -1,4 +1,11 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Member } from '../../members/entities/member.entity';
 
 @Entity('ai_insights')
@@ -6,7 +13,8 @@ export class AiInsight {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @ManyToOne(() => Member, m => m.ai_insights)
+  @ManyToOne(() => Member, (m) => m.ai_insights)
+  @JoinColumn({ name: 'member_id' })
   member: Member;
 
   @Column({ nullable: true })

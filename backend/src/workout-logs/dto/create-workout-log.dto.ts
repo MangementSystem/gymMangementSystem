@@ -1,11 +1,12 @@
-import { IsNumber, IsDateString, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsDateString, IsString } from 'class-validator';
 
 export class CreateWorkoutLogDto {
   @IsNumber()
   memberId: number;
 
+  @IsOptional()
   @IsNumber()
-  programId: number;
+  programId?: number;
 
   @IsDateString()
   date: Date;

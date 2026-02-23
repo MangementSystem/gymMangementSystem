@@ -1,5 +1,5 @@
-"use client";
-import React, { useEffect, useState } from "react";
+'use client';
+import React, { useEffect, useState } from 'react';
 import {
   LineChart,
   Line,
@@ -10,18 +10,16 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
-} from "recharts";
-import { 
-  Users, 
-  CreditCard, 
-  Wifi, 
-  TrendingUp, 
-  DollarSign, 
+} from 'recharts';
+import {
+  Users,
+  CreditCard,
+  Wifi,
+  TrendingUp,
+  DollarSign,
   Activity,
-  Calendar,
-  Zap,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
 } from 'lucide-react';
 
 export default function DashboardPage() {
@@ -49,21 +47,21 @@ export default function DashboardPage() {
     });
 
     setRevenueData([
-      { month: "Jan", revenue: 3200 },
-      { month: "Feb", revenue: 2800 },
-      { month: "Mar", revenue: 3500 },
-      { month: "Apr", revenue: 4100 },
-      { month: "May", revenue: 3900 },
-      { month: "Jun", revenue: 4600 },
+      { month: 'Jan', revenue: 3200 },
+      { month: 'Feb', revenue: 2800 },
+      { month: 'Mar', revenue: 3500 },
+      { month: 'Apr', revenue: 4100 },
+      { month: 'May', revenue: 3900 },
+      { month: 'Jun', revenue: 4600 },
     ]);
 
     setMembersData([
-      { month: "Jan", members: 40 },
-      { month: "Feb", members: 35 },
-      { month: "Mar", members: 50 },
-      { month: "Apr", members: 70 },
-      { month: "May", members: 65 },
-      { month: "Jun", members: 85 },
+      { month: 'Jan', members: 40 },
+      { month: 'Feb', members: 35 },
+      { month: 'Mar', members: 50 },
+      { month: 'Apr', members: 70 },
+      { month: 'May', members: 65 },
+      { month: 'Jun', members: 85 },
     ]);
   }, []);
 
@@ -80,7 +78,8 @@ export default function DashboardPage() {
         <div className="bg-gray-900 border-2 border-yellow-500/30 rounded-lg p-3 shadow-xl">
           <p className="text-yellow-400 font-black text-sm">{label}</p>
           <p className="text-gray-200 font-bold">
-            {payload[0].dataKey === 'revenue' ? '$' : ''}{payload[0].value}
+            {payload[0].dataKey === 'revenue' ? '$' : ''}
+            {payload[0].value}
             {payload[0].dataKey === 'members' ? ' Members' : ''}
           </p>
         </div>
@@ -106,34 +105,34 @@ export default function DashboardPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
-        <StatCard 
-          title="Total Members" 
-          value={stats.members} 
+        <StatCard
+          title="Total Members"
+          value={stats.members}
           icon={Users}
           gradient="from-blue-500 to-cyan-500"
           growth={stats.membersGrowth}
         />
-        <StatCard 
-          title="Membership Plans" 
-          value={stats.plans} 
+        <StatCard
+          title="Membership Plans"
+          value={stats.plans}
           icon={CreditCard}
           gradient="from-green-500 to-emerald-500"
         />
-        <StatCard 
-          title="Connected Devices" 
-          value={stats.devices} 
+        <StatCard
+          title="Connected Devices"
+          value={stats.devices}
           icon={Wifi}
           gradient="from-purple-500 to-pink-500"
         />
-        <StatCard 
-          title="Active Memberships" 
-          value={stats.activeMemberships} 
+        <StatCard
+          title="Active Memberships"
+          value={stats.activeMemberships}
           icon={TrendingUp}
           gradient="from-yellow-500 to-orange-500"
         />
-        <StatCard 
-          title="Total Revenue" 
-          value={`$${stats.totalRevenue.toLocaleString()}`} 
+        <StatCard
+          title="Total Revenue"
+          value={`$${stats.totalRevenue.toLocaleString()}`}
           icon={DollarSign}
           gradient="from-orange-500 to-red-500"
           growth={stats.revenueGrowth}
@@ -162,12 +161,16 @@ export default function DashboardPage() {
               <LineChart data={revenueData}>
                 <defs>
                   <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#ec4899" stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor="#ec4899" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#ec4899" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="#ec4899" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="month" stroke="#9CA3AF" style={{ fontSize: '12px', fontWeight: 'bold' }} />
+                <XAxis
+                  dataKey="month"
+                  stroke="#9CA3AF"
+                  style={{ fontSize: '12px', fontWeight: 'bold' }}
+                />
                 <YAxis stroke="#9CA3AF" style={{ fontSize: '12px', fontWeight: 'bold' }} />
                 <Tooltip content={<CustomTooltip />} />
                 <Line
@@ -216,12 +219,16 @@ export default function DashboardPage() {
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                <XAxis dataKey="month" stroke="#9CA3AF" style={{ fontSize: '12px', fontWeight: 'bold' }} />
+                <XAxis
+                  dataKey="month"
+                  stroke="#9CA3AF"
+                  style={{ fontSize: '12px', fontWeight: 'bold' }}
+                />
                 <YAxis stroke="#9CA3AF" style={{ fontSize: '12px', fontWeight: 'bold' }} />
                 <Tooltip content={<CustomTooltip />} />
-                <Bar 
-                  dataKey="members" 
-                  fill="url(#barGradient)" 
+                <Bar
+                  dataKey="members"
+                  fill="url(#barGradient)"
                   radius={[8, 8, 0, 0]}
                   maxBarSize={60}
                 />
@@ -255,11 +262,15 @@ function StatCard({ title, value, icon: Icon, gradient, growth }: StatCardProps)
     <div className="bg-gray-900 rounded-xl shadow-2xl border-2 border-gray-800 hover:border-yellow-500/50 transition-all group overflow-hidden">
       <div className="p-6">
         <div className="flex items-start justify-between mb-4">
-          <div className={`w-12 h-12 bg-gradient-to-br ${gradient} rounded-lg flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}>
+          <div
+            className={`w-12 h-12 bg-gradient-to-br ${gradient} rounded-lg flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform`}
+          >
             <Icon className="w-6 h-6 text-white" />
           </div>
           {growth !== undefined && (
-            <div className={`flex items-center gap-1 px-2 py-1 rounded-lg ${growth >= 0 ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+            <div
+              className={`flex items-center gap-1 px-2 py-1 rounded-lg ${growth >= 0 ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}
+            >
               {growth >= 0 ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />}
               <span className="text-xs font-black">{Math.abs(growth)}%</span>
             </div>

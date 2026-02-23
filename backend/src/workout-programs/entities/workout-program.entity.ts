@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+} from 'typeorm';
 import { Member } from '../../members/entities/member.entity';
 import { WorkoutProgramExercise } from '../../workout-program-exercises/entities/workout-program-exercise.entity';
 import { WorkoutLog } from '../../workout-logs/entities/workout-log.entity';
@@ -8,7 +16,8 @@ export class WorkoutProgram {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @ManyToOne(() => Member, member => member.workout_programs)
+  @ManyToOne(() => Member, (member) => member.workout_programs)
+  @JoinColumn({ name: 'member_id' })
   member: Member;
 
   @Column()
@@ -20,9 +29,9 @@ export class WorkoutProgram {
   @CreateDateColumn()
   created_at: Date;
 
-  @OneToMany(() => WorkoutProgramExercise, wpe => wpe.program)
+  @OneToMany(() => WorkoutProgramExercise, (wpe) => wpe.program)
   exercises: WorkoutProgramExercise[];
 
-  @OneToMany(() => WorkoutLog, wl => wl.program)
+  @OneToMany(() => WorkoutLog, (wl) => wl.program)
   logs: WorkoutLog[];
 }

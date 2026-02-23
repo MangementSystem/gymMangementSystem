@@ -1,0 +1,149 @@
+{
+  "info": {
+    "name": "Gym Management Backend API (Compact)",
+    "_postman_id": "f8f72885-5e8f-4e8e-a1b4-4fa5e33d1173",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3001/api" },
+    { "key": "accessToken", "value": "" },
+    { "key": "organizationId", "value": "1" },
+    { "key": "memberId", "value": "1" },
+    { "key": "planId", "value": "1" },
+    { "key": "membershipId", "value": "1" },
+    { "key": "transactionId", "value": "1" },
+    { "key": "deviceId", "value": "1" },
+    { "key": "attendanceLogId", "value": "1" },
+    { "key": "progressId", "value": "1" },
+    { "key": "exerciseId", "value": "1" },
+    { "key": "workoutProgramId", "value": "1" },
+    { "key": "workoutProgramExerciseId", "value": "1" },
+    { "key": "workoutLogId", "value": "1" },
+    { "key": "workoutLogSetId", "value": "1" },
+    { "key": "aiExerciseAnalysisId", "value": "1" },
+    { "key": "aiInsightId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Auth + Health",
+      "item": [
+        { "name": "Root", "request": { "method": "GET", "url": "{{baseUrl}}/" } },
+        { "name": "Health", "request": { "method": "GET", "url": "{{baseUrl}}/health" } },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"StrongPass123\",\n  \"firstName\": \"Gym\",\n  \"lastName\": \"Admin\",\n  \"role\": \"admin\"\n}" },
+            "url": "{{baseUrl}}/auth/register"
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const data = pm.response.json();",
+                  "if (data.accessToken) pm.collectionVariables.set('accessToken', data.accessToken);"
+                ]
+              }
+            }
+          ], 
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"StrongPass123\"\n}" },
+            "url": "{{baseUrl}}/auth/login"
+          }
+        },
+        { "name": "Profile", "request": { "method": "GET", "url": "{{baseUrl}}/auth/profile" } },
+        { "name": "Refresh", "request": { "method": "POST", "url": "{{baseUrl}}/auth/refresh" } }
+      ]
+    },
+    {
+      "name": "Core CRUD",
+      "item": [
+        { "name": "Organizations", "request": { "method": "GET", "url": "{{baseUrl}}/organizations" } },
+        { "name": "Members", "request": { "method": "GET", "url": "{{baseUrl}}/members?organizationId={{organizationId}}" } },
+        { "name": "Member Stats", "request": { "method": "GET", "url": "{{baseUrl}}/members/{{memberId}}/stats" } },
+        { "name": "Plans", "request": { "method": "GET", "url": "{{baseUrl}}/plans?organizationId={{organizationId}}" } },
+        { "name": "Memberships", "request": { "method": "GET", "url": "{{baseUrl}}/memberships?organizationId={{organizationId}}&memberId={{memberId}}" } },
+        { "name": "Renew Membership", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"planId\": {{planId}}\n}" }, "url": "{{baseUrl}}/memberships/{{membershipId}}/renew" } },
+        { "name": "Cancel Membership", "request": { "method": "POST", "url": "{{baseUrl}}/memberships/{{membershipId}}/cancel" } },
+        { "name": "Transactions", "request": { "method": "GET", "url": "{{baseUrl}}/transactions?organizationId={{organizationId}}" } },
+        { "name": "Financial Report", "request": { "method": "GET", "url": "{{baseUrl}}/transactions/reports/financial?organizationId={{organizationId}}&startDate=2026-01-01&endDate=2026-12-31" } },
+        { "name": "Attendance Devices", "request": { "method": "GET", "url": "{{baseUrl}}/attendance-devices?organizationId={{organizationId}}" } },
+        { "name": "Attendance Logs", "request": { "method": "GET", "url": "{{baseUrl}}/attendance-logs?organizationId={{organizationId}}&memberId={{memberId}}" } },
+        { "name": "Check In", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\n  \"memberId\": {{memberId}},\n  \"deviceId\": {{deviceId}}\n}" }, "url": "{{baseUrl}}/attendance-logs/check-in" } },
+        { "name": "Check Out", "request": { "method": "POST", "url": "{{baseUrl}}/attendance-logs/{{attendanceLogId}}/check-out" } },
+        { "name": "Progress", "request": { "method": "GET", "url": "{{baseUrl}}/progress?memberId={{memberId}}" } }
+      ]
+    },
+    {
+      "name": "Workout",
+      "item": [
+        { "name": "Exercises", "request": { "method": "GET", "url": "{{baseUrl}}/exercises" } },
+        { "name": "Workout Programs", "request": { "method": "GET", "url": "{{baseUrl}}/workout-programs?memberId={{memberId}}" } },
+        { "name": "Workout Program Exercises", "request": { "method": "GET", "url": "{{baseUrl}}/workout-program-exercises?programId={{workoutProgramId}}" } },
+        { "name": "Workout Logs", "request": { "method": "GET", "url": "{{baseUrl}}/workout-logs?memberId={{memberId}}&programId={{workoutProgramId}}" } },
+        { "name": "Workout Log Sets", "request": { "method": "GET", "url": "{{baseUrl}}/workout-log-sets?workoutLogId={{workoutLogId}}" } }
+      ]
+    },
+    {
+      "name": "AI",
+      "item": [
+        { "name": "AI Exercise Analysis List", "request": { "method": "GET", "url": "{{baseUrl}}/ai-exercise-analysis?memberId={{memberId}}&workoutLogId={{workoutLogId}}" } },
+        {
+          "name": "AI Analyze Exercise Form",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"memberId\": {{memberId}},\n  \"exerciseId\": {{exerciseId}},\n  \"workoutLogId\": {{workoutLogId}},\n  \"videoUrl\": \"https://example.com/video.mp4\"\n}" },
+            "url": "{{baseUrl}}/ai-exercise-analysis/analyze"
+          }
+        },
+        { "name": "AI Insights List", "request": { "method": "GET", "url": "{{baseUrl}}/ai-insights?memberId={{memberId}}&category=performance" } },
+        {
+          "name": "AI Generate Insight",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"memberId\": {{memberId}},\n  \"category\": \"performance\",\n  \"inputData\": {}\n}" },
+            "url": "{{baseUrl}}/ai-insights/generate"
+          }
+        },
+        {
+          "name": "AI Workout Recommendation",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"memberId\": {{memberId}},\n  \"goals\": [\"strength\", \"fat_loss\"]\n}" },
+            "url": "{{baseUrl}}/ai-insights/recommendations/workout"
+          }
+        },
+        {
+          "name": "AI Goal Prediction",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"memberId\": {{memberId}},\n  \"goalType\": \"weight_loss\"\n}" },
+            "url": "{{baseUrl}}/ai-insights/predictions/goal-completion"
+          }
+        }
+      ]
+    }
+  ]
+}

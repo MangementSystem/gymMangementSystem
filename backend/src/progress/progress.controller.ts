@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { ProgressService } from './progress.service';
 import { CreateProgressDto } from './dto/create-progress.dto';
 import { UpdateProgressDto } from './dto/update-progress.dto';
@@ -13,8 +22,16 @@ export class ProgressController {
   }
 
   @Get()
-  findAll() {
-    return this.progressService.findAll();
+  findAll(
+    @Query('memberId') memberId?: string,
+    @Query('startDate') startDate?: string,
+    @Query('endDate') endDate?: string,
+  ) {
+    return this.progressService.findAll(
+      memberId ? +memberId : undefined,
+      startDate,
+      endDate,
+    );
   }
 
   @Get(':id')
@@ -23,7 +40,10 @@ export class ProgressController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProgressDto: UpdateProgressDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateProgressDto: UpdateProgressDto,
+  ) {
     return this.progressService.update(+id, updateProgressDto);
   }
 

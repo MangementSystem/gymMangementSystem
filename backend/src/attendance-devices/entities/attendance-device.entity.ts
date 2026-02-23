@@ -1,4 +1,12 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
+} from 'typeorm';
 import { Organization } from '../../organizations/entities/organization.entity';
 import { AttendanceLog } from '../../attendance-logs/entities/attendance-log.entity';
 
@@ -7,7 +15,8 @@ export class AttendanceDevice {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @ManyToOne(() => Organization, org => org.devices)
+  @ManyToOne(() => Organization, (org) => org.devices)
+  @JoinColumn({ name: 'organization_id' })
   organization: Organization;
 
   @Column()
@@ -25,6 +34,6 @@ export class AttendanceDevice {
   @CreateDateColumn()
   created_at: Date;
 
-  @OneToMany(() => AttendanceLog, log => log.device)
+  @OneToMany(() => AttendanceLog, (log) => log.device)
   logs: AttendanceLog[];
 }

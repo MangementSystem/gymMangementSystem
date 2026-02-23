@@ -1,15 +1,17 @@
-"use client";
-import { 
-  Users, 
-  TrendingUp, 
-  DollarSign, 
+'use client';
+
+import { useRouter } from 'next/navigation';
+import {
+  Users,
   Activity,
-  Calendar,
+  DollarSign,
   Dumbbell,
-  Brain,
-  Zap,
-  ArrowUp,
-  ArrowDown
+  TrendingUp,
+  Clock,
+  AlertCircle,
+  UserPlus,
+  BookOpen,
+  BarChart3,
 } from 'lucide-react';
 import { useGetMembersQuery } from '@/lib/api/membersApi';
 import { useGetAttendanceLogsQuery } from '@/lib/api/attendanceApi';
@@ -19,168 +21,216 @@ import { useAppSelector } from '@/lib/redux/hooks';
 import { selectCurrentOrganization } from '@/lib/redux/slices/uiSlice';
 
 export default function DashboardPage() {
+  const router = useRouter();
   const currentOrganization = useAppSelector(selectCurrentOrganization);
-  
   const today = new Date().toISOString().split('T')[0];
-  const lastMonth = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const monthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+    .toISOString()
+    .split('T')[0];
 
-  const { data: members } = useGetMembersQuery({ organizationId: currentOrganization || undefined });
-  const { data: attendanceLogs } = useGetAttendanceLogsQuery({ startDate: today, endDate: today });
-  const { data: transactions } = useGetTransactionsQuery({ 
+  const { data: members } = useGetMembersQuery({
     organizationId: currentOrganization || undefined,
-    startDate: lastMonth,
-    endDate: today
   });
-  const { data: workoutLogs } = useGetWorkoutLogsQuery({ startDate: lastMonth, endDate: today });
+  const { data: todayLogs } = useGetAttendanceLogsQuery({
+    organizationId: currentOrganization || undefined,
+    startDate: today,
+    endDate: today,
+  });
+  const { data: monthlyTransactions } = useGetTransactionsQuery({
+    organizationId: currentOrganization || undefined,
+    startDate: monthStart,
+    endDate: today,
+  });
+  const { data: workoutLogs } = useGetWorkoutLogsQuery({ startDate: today, endDate: today });
+
+  const totalRevenue =
+    monthlyTransactions?.reduce((sum: number, t: any) => {
+      const isExpense = t.type === 'expense' || t.type === 'refund' || Number(t.amount) < 0;
+      return isExpense ? sum : sum + Math.abs(Number(t.amount));
+    }, 0) ?? 0;
 
   const stats = [
     {
       title: 'Total Members',
-      value: members?.length || 0,
-      change: '+12%',
-      trend: 'up',
+      value: members?.length ?? 0,
+      change: '+45%',
       icon: Users,
-      gradient: 'from-yellow-400 to-orange-500',
-      bgGradient: 'from-yellow-500/10 to-orange-500/10'
+      color: 'from-orange-500 to-red-600',
     },
     {
       title: "Today's Check-ins",
-      value: attendanceLogs?.filter(log => log.check_in)?.length || 0,
+      value: todayLogs?.length ?? 0,
       change: '+8%',
-      trend: 'up',
       icon: Activity,
-      gradient: 'from-orange-500 to-red-500',
-      bgGradient: 'from-orange-500/10 to-red-500/10'
+      color: 'from-red-500 to-pink-600',
     },
     {
       title: 'Monthly Revenue',
-      value: `$${transactions?.reduce((sum, t) => sum + Number(t.amount), 0).toFixed(2) || 0}`,
+      value: `$${totalRevenue.toFixed(0)}`,
       change: '+23%',
-      trend: 'up',
       icon: DollarSign,
-      gradient: 'from-yellow-500 to-red-500',
-      bgGradient: 'from-yellow-500/10 to-red-500/10'
+      color: 'from-yellow-500 to-orange-600',
     },
     {
       title: 'Active Workouts',
-      value: workoutLogs?.length || 0,
-      change: '-4%',
-      trend: 'down',
+      value: workoutLogs?.length ?? 0,
+      change: '+12%',
       icon: Dumbbell,
-      gradient: 'from-red-500 to-orange-400',
-      bgGradient: 'from-red-500/10 to-orange-400/10'
-    }
+      color: 'from-orange-500 to-red-600',
+    },
   ];
 
-  const recentActivities = [
-    { member: 'John Doe', action: 'Checked in', time: '10 mins ago', icon: Activity },
-    { member: 'Sarah Smith', action: 'Completed workout', time: '25 mins ago', icon: Dumbbell },
-    { member: 'Mike Johnson', action: 'New membership', time: '1 hour ago', icon: Users },
-    { member: 'Emma Wilson', action: 'AI analysis completed', time: '2 hours ago', icon: Brain },
+  const quickActions = [
+    {
+      name: 'Add New Member',
+      color: 'from-yellow-500 to-orange-600',
+      icon: UserPlus,
+      href: '/members',
+    },
+    {
+      name: 'Create Workout Plan',
+      color: 'from-orange-500 to-red-600',
+      icon: BookOpen,
+      href: '/workout-programs',
+    },
+    {
+      name: 'Record Payment',
+      color: 'from-red-500 to-pink-600',
+      icon: DollarSign,
+      href: '/transactions',
+    },
+    {
+      name: 'View Reports',
+      color: 'from-orange-500 to-yellow-600',
+      icon: BarChart3,
+      href: '/reports',
+    },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-black p-8">
+    <div className="min-h-screen bg-black text-white">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 mb-2">
-          Dashboard
-        </h1>
-        <p className="text-gray-400 font-bold">Welcome back! Here's what's happening today.</p>
+      <div className="border-b border-gray-800 bg-gradient-to-r from-gray-900 to-black">
+        <div className="p-8">
+          <h1 className="text-3xl font-bold mb-2">Dashboard</h1>
+          <p className="text-gray-400">Welcome back! Here&apos;s what&apos;s happening today.</p>
+        </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          const TrendIcon = stat.trend === 'up' ? ArrowUp : ArrowDown;
-          
-          return (
-            <div 
-              key={stat.title}
-              className={`bg-gradient-to-br ${stat.bgGradient} border border-yellow-500/20 rounded-xl p-6 hover:border-yellow-500/50 transition-all hover:scale-105 transform`}
+      <div className="p-8">
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {stats.map((stat, index) => (
+            <div
+              key={index}
+              className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-xl p-6 hover:border-orange-500/50 transition-all"
             >
-              <div className="flex items-center justify-between mb-4">
-                <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-lg`}>
-                  <Icon className="w-6 h-6 text-black" />
+              <div className="flex items-start justify-between mb-4">
+                <div
+                  className={`w-12 h-12 bg-gradient-to-br ${stat.color} rounded-lg flex items-center justify-center`}
+                >
+                  <stat.icon className="w-6 h-6 text-white" />
                 </div>
-                <div className={`flex items-center gap-1 text-xs font-black ${stat.trend === 'up' ? 'text-green-400' : 'text-red-400'}`}>
-                  <TrendIcon className="w-4 h-4" />
+                <div className="flex items-center text-sm font-semibold text-green-500">
+                  <TrendingUp className="w-4 h-4 mr-1" />
                   {stat.change}
                 </div>
               </div>
-              <p className="text-gray-400 text-sm font-bold mb-1">{stat.title}</p>
-              <p className="text-3xl font-black text-white">{stat.value}</p>
+              <div className="text-sm text-gray-400 mb-1">{stat.title}</div>
+              <div className="text-3xl font-bold">{stat.value}</div>
             </div>
-          );
-        })}
-      </div>
-
-      {/* Charts & Activity Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Activity */}
-        <div className="lg:col-span-2 bg-gradient-to-br from-gray-900/50 to-black border-2 border-yellow-500/20 rounded-xl p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">
-              Recent Activity
-            </h2>
-            <Calendar className="w-5 h-5 text-yellow-400" />
-          </div>
-          
-          <div className="space-y-4">
-            {recentActivities.map((activity, index) => {
-              const ActivityIcon = activity.icon;
-              return (
-                <div 
-                  key={index}
-                  className="flex items-center gap-4 p-4 bg-gradient-to-r from-yellow-500/5 to-orange-500/5 rounded-lg border border-yellow-500/10 hover:border-yellow-500/30 transition-all"
-                >
-                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
-                    <ActivityIcon className="w-5 h-5 text-black" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-black text-white">{activity.member}</p>
-                    <p className="text-sm text-gray-400 font-medium">{activity.action}</p>
-                  </div>
-                  <span className="text-xs text-gray-500 font-bold">{activity.time}</span>
-                </div>
-              );
-            })}
-          </div>
+          ))}
         </div>
 
-        {/* Quick Actions */}
-        <div className="bg-gradient-to-br from-gray-900/50 to-black border-2 border-yellow-500/20 rounded-xl p-6">
-          <div className="flex items-center gap-3 mb-6">
-            <Zap className="w-6 h-6 text-yellow-400" />
-            <h2 className="text-xl font-black text-white">Quick Actions</h2>
-          </div>
-          
-          <div className="space-y-3">
-            {[
-              { label: 'Add New Member', gradient: 'from-yellow-400 to-orange-500' },
-              { label: 'Create Workout Plan', gradient: 'from-orange-500 to-red-500' },
-              { label: 'Record Payment', gradient: 'from-yellow-500 to-red-500' },
-              { label: 'View Reports', gradient: 'from-red-400 to-orange-400' },
-            ].map((action) => (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Recent Activity */}
+          <div className="lg:col-span-2 bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-xl p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-orange-500">Recent Check-ins</h2>
               <button
-                key={action.label}
-                className={`w-full bg-gradient-to-r ${action.gradient} text-black font-black py-3 rounded-lg hover:scale-105 transform transition-all shadow-lg hover:shadow-xl`}
+                onClick={() => router.push('/attendance/logs')}
+                className="text-sm text-gray-400 hover:text-white transition-colors"
               >
-                {action.label}
+                View All
               </button>
-            ))}
+            </div>
+            <div className="space-y-4">
+              {todayLogs && todayLogs.length > 0 ? (
+                todayLogs.slice(0, 5).map((log: any) => {
+                  const name = log.member
+                    ? `${log.member.first_name ?? ''} ${log.member.last_name ?? ''}`.trim()
+                    : 'Unknown Member';
+                  const initials = name
+                    .split(' ')
+                    .map((n: string) => n[0])
+                    .join('')
+                    .toUpperCase()
+                    .slice(0, 2);
+                  return (
+                    <div
+                      key={log.id}
+                      className="flex items-center justify-between p-4 bg-black/30 rounded-lg hover:bg-black/50 transition-colors"
+                    >
+                      <div className="flex items-center space-x-4">
+                        <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-600 rounded-full flex items-center justify-center text-sm font-bold">
+                          {initials || '?'}
+                        </div>
+                        <div>
+                          <div className="font-semibold">{name}</div>
+                          <div className="text-sm text-gray-400">
+                            {log.check_out ? 'Checked out' : 'Checked in'}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="text-sm text-gray-400 flex items-center">
+                        <Clock className="w-4 h-4 mr-1" />
+                        {new Date(log.check_in).toLocaleTimeString()}
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <Activity className="w-12 h-12 mx-auto mb-2 opacity-40" />
+                  <p>No check-ins today yet.</p>
+                </div>
+              )}
+            </div>
           </div>
 
-          {/* AI Insight Card */}
-          <div className="mt-6 bg-gradient-to-br from-yellow-500/10 to-orange-500/10 border border-yellow-500/30 rounded-lg p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <Brain className="w-5 h-5 text-yellow-400" />
-              <span className="text-xs font-black text-yellow-400">AI INSIGHT</span>
+          {/* Quick Actions */}
+          <div className="bg-gradient-to-br from-gray-900 to-gray-800 border border-gray-700 rounded-xl p-6">
+            <div className="flex items-center mb-6">
+              <div className="w-8 h-8 bg-gradient-to-br from-yellow-500 to-orange-600 rounded-lg flex items-center justify-center mr-3">
+                <Activity className="w-5 h-5 text-white" />
+              </div>
+              <h2 className="text-xl font-bold">Quick Actions</h2>
             </div>
-            <p className="text-sm text-gray-300 font-bold">
-              Peak hours: 6-8 PM. Consider adding more classes during this time.
-            </p>
+            <div className="space-y-3">
+              {quickActions.map((action, index) => (
+                <button
+                  key={index}
+                  onClick={() => router.push(action.href)}
+                  className={`w-full py-3 px-4 bg-gradient-to-r ${action.color} rounded-lg font-semibold hover:opacity-90 transition-opacity flex items-center gap-2`}
+                >
+                  <action.icon className="w-5 h-5" />
+                  {action.name}
+                </button>
+              ))}
+            </div>
+
+            {/* Alert */}
+            <div className="mt-6 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+              <div className="flex items-start">
+                <AlertCircle className="w-5 h-5 text-yellow-500 mr-2 flex-shrink-0 mt-0.5" />
+                <div>
+                  <div className="font-semibold text-yellow-500 mb-1">REMINDER</div>
+                  <div className="text-sm text-gray-300">
+                    Peak hours: 6-9 PM. Consider adding more classes during this time.
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

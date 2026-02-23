@@ -1,20 +1,37 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { WorkoutProgramExercisesService } from './workout-program-exercises.service';
 import { CreateWorkoutProgramExerciseDto } from './dto/create-workout-program-exercise.dto';
 import { UpdateWorkoutProgramExerciseDto } from './dto/update-workout-program-exercise.dto';
 
 @Controller('workout-program-exercises')
 export class WorkoutProgramExercisesController {
-  constructor(private readonly workoutProgramExercisesService: WorkoutProgramExercisesService) {}
+  constructor(
+    private readonly workoutProgramExercisesService: WorkoutProgramExercisesService,
+  ) {}
 
   @Post()
-  create(@Body() createWorkoutProgramExerciseDto: CreateWorkoutProgramExerciseDto) {
-    return this.workoutProgramExercisesService.create(createWorkoutProgramExerciseDto);
+  create(
+    @Body() createWorkoutProgramExerciseDto: CreateWorkoutProgramExerciseDto,
+  ) {
+    return this.workoutProgramExercisesService.create(
+      createWorkoutProgramExerciseDto,
+    );
   }
 
   @Get()
-  findAll() {
-    return this.workoutProgramExercisesService.findAll();
+  findAll(@Query('programId') programId?: string) {
+    return this.workoutProgramExercisesService.findAll(
+      programId ? +programId : undefined,
+    );
   }
 
   @Get(':id')
@@ -23,8 +40,14 @@ export class WorkoutProgramExercisesController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateWorkoutProgramExerciseDto: UpdateWorkoutProgramExerciseDto) {
-    return this.workoutProgramExercisesService.update(+id, updateWorkoutProgramExerciseDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateWorkoutProgramExerciseDto: UpdateWorkoutProgramExerciseDto,
+  ) {
+    return this.workoutProgramExercisesService.update(
+      +id,
+      updateWorkoutProgramExerciseDto,
+    );
   }
 
   @Delete(':id')

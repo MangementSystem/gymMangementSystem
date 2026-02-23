@@ -1,4 +1,11 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateWorkoutProgramDto } from './create-workout-program.dto';
+import { IsOptional, IsString } from 'class-validator';
 
-export class UpdateWorkoutProgramDto extends PartialType(CreateWorkoutProgramDto) {}
+export class UpdateWorkoutProgramDto {
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  goal?: string;
+}

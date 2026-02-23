@@ -1,5 +1,5 @@
-"use client";
-import { useState } from 'react';
+'use client';
+import { useEffect, useState } from 'react';
 import { Sliders, Moon, Sun, Bell, Globe, Save } from 'lucide-react';
 import { useAppSelector, useAppDispatch } from '@/lib/redux/hooks';
 import { selectTheme, setTheme, addNotification } from '@/lib/redux/slices/uiSlice';
@@ -10,7 +10,22 @@ export default function PreferencesPage() {
   const [notifications, setNotifications] = useState(true);
   const [language, setLanguage] = useState('en');
 
+  useEffect(() => {
+    const savedNotifications = localStorage.getItem('preferences.notifications');
+    const savedLanguage = localStorage.getItem('preferences.language');
+
+    if (savedNotifications !== null) {
+      setNotifications(savedNotifications === 'true');
+    }
+
+    if (savedLanguage) {
+      setLanguage(savedLanguage);
+    }
+  }, []);
+
   const handleSave = () => {
+    localStorage.setItem('preferences.notifications', String(notifications));
+    localStorage.setItem('preferences.language', language);
     dispatch(addNotification({ type: 'success', message: 'Preferences saved successfully' }));
   };
 
@@ -39,13 +54,17 @@ export default function PreferencesPage() {
             <div className="p-6 bg-gray-800/50 rounded-lg border border-yellow-500/10">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  {currentTheme === 'dark' ? <Moon className="w-5 h-5 text-yellow-400" /> : <Sun className="w-5 h-5 text-yellow-400" />}
+                  {currentTheme === 'dark' ? (
+                    <Moon className="w-5 h-5 text-yellow-400" />
+                  ) : (
+                    <Sun className="w-5 h-5 text-yellow-400" />
+                  )}
                   <div>
                     <p className="font-black text-white">Theme</p>
                     <p className="text-sm text-gray-400 font-medium">Choose your color scheme</p>
                   </div>
                 </div>
-                <select 
+                <select
                   value={currentTheme}
                   onChange={(e) => dispatch(setTheme(e.target.value as 'light' | 'dark'))}
                   className="bg-gray-800 border border-yellow-500/20 rounded-lg px-4 py-2 text-white focus:border-yellow-500/50 focus:outline-none font-bold"
@@ -66,8 +85,8 @@ export default function PreferencesPage() {
                   </div>
                 </div>
                 <label className="relative inline-flex items-center cursor-pointer">
-                  <input 
-                    type="checkbox" 
+                  <input
+                    type="checkbox"
                     checked={notifications}
                     onChange={(e) => setNotifications(e.target.checked)}
                     className="sr-only peer"
@@ -83,10 +102,12 @@ export default function PreferencesPage() {
                   <Globe className="w-5 h-5 text-yellow-400" />
                   <div>
                     <p className="font-black text-white">Language</p>
-                    <p className="text-sm text-gray-400 font-medium">Select your preferred language</p>
+                    <p className="text-sm text-gray-400 font-medium">
+                      Select your preferred language
+                    </p>
                   </div>
                 </div>
-                <select 
+                <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
                   className="bg-gray-800 border border-yellow-500/20 rounded-lg px-4 py-2 text-white focus:border-yellow-500/50 focus:outline-none font-bold"
@@ -100,11 +121,12 @@ export default function PreferencesPage() {
             </div>
 
             <div className="flex gap-4 pt-6 border-t border-yellow-500/20">
-              <button 
+              <button
                 onClick={handleSave}
                 className="bg-gradient-to-r from-yellow-400 to-orange-500 text-black font-black px-8 py-3 rounded-lg hover:scale-105 transform transition-all flex items-center gap-2 shadow-lg"
               >
-                <Save className="w-5 h-5" />Save Preferences
+                <Save className="w-5 h-5" />
+                Save Preferences
               </button>
             </div>
           </div>

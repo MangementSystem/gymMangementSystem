@@ -1,4 +1,27 @@
-import { PartialType } from '@nestjs/mapped-types';
-import { CreateExerciseDto } from './create-exercise.dto';
+import { IsOptional, IsString, IsObject } from 'class-validator';
 
-export class UpdateExerciseDto extends PartialType(CreateExerciseDto) {}
+export class UpdateExerciseDto {
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsString()
+  category?: string;
+
+  @IsOptional()
+  @IsString()
+  equipment?: string;
+
+  @IsOptional()
+  @IsString()
+  instructions?: string;
+
+  @IsOptional()
+  @IsObject()
+  metadata?: any;
+}

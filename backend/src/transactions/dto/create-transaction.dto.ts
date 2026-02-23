@@ -5,10 +5,12 @@ export class CreateTransactionDto {
   organizationId: number;
 
   @IsNumber()
-  membershipId: number;
+  @IsOptional()
+  membershipId?: number;
 
+  @IsOptional()
   @IsNumber()
-  memberId: number;
+  memberId?: number;
 
   @IsString()
   type: string;
